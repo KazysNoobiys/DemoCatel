@@ -1,0 +1,82 @@
+﻿<catel:DataWindow x:Class="Demo.Views.ChangeProjectWindow"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:catel="http://schemas.catelproject.com"
+                  xmlns:orc="http://www.wildgums.net.au/orc"
+                  ResizeMode="NoResize" MinHeight="300">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Заказчик" Margin="5"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Customer}" MinWidth="100"  Margin="5"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Исполнитель" Margin="5"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Performer}" MinWidth="100"  Margin="5"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Приоритет" Margin="5"/>
+        <orc:NumericTextBox Grid.Row="2" Grid.Column="1" Text="{Binding Priority}"
+                            MinValue="1" MaxValue="10" MinWidth="100" Margin="5" />
+
+        <Expander Grid.Row="3" Grid.ColumnSpan="2" Header="Дополнительно" Margin="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Лидер проекта" Margin="5"/>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="5">
+                    <ComboBox  ItemsSource="{Binding ListLeaders}" IsEnabled="{Binding EnabledListLeaders}"
+                          SelectedItem="{Binding SelectedLeader}" SelectedIndex="{Binding SelectedIndex}" >
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate >
+                                <TextBlock>
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0} {1}">
+                                            <Binding Path="Employee.FirstName"/>
+                                            <Binding Path="Employee.LastName"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <CheckBox x:Name="CheckBox" Content="Без лидера" IsChecked="False" 
+                              Margin="5,0,0,0" Command="{Binding OffLeaderCommand}"/>
+                </StackPanel>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Дата окончания проект" Margin="5"/>
+                <DatePicker Grid.Row="1" Grid.Column="1" Margin="5"
+                            SelectedDate="{Binding DateTimeEnd}"  />
+                <Expander Grid.Row="2" Grid.ColumnSpan="2" Header="Описание проекта" Margin="5">
+                    <TextBox Margin="5" Text="{Binding Description}" MinLines="5"/>
+                </Expander>
+                <Expander Grid.Row="3" Grid.ColumnSpan="2" Header="Сотрудники" Margin="5">
+                    <DataGrid ItemsSource="{Binding IncludeEmployees}" AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Имя" Binding="{Binding Employee.FirstName}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Фамилия" Binding="{Binding Employee.LastName}" IsReadOnly="True" />
+                            <DataGridCheckBoxColumn Header="Включён в проект" Binding="{Binding IsInclude, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Expander>
+            </Grid>
+        </Expander>
+
+    </Grid>
+
+</catel:DataWindow>

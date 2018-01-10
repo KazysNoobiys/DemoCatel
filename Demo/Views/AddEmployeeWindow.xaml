@@ -1,0 +1,85 @@
+﻿<catel:DataWindow x:Class="Demo.Views.AddEmployeeWindow"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:catel="http://schemas.catelproject.com"
+                  xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                  ResizeMode="NoResize" MinWidth="400">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Имя" Margin="5"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding FirstName}" MinWidth="100"  Margin="5"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Фамилия" Margin="5"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding LastName}" MinWidth="100"  Margin="5"/>
+
+
+        <Expander Grid.Row="2" Grid.ColumnSpan="2" Header="Дополнительно" Margin="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Отчество" Margin="5"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Patronymic}" MinWidth="100"  Margin="5"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Email" Margin="5"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Email}" MinWidth="100"  Margin="5"/>
+
+                <Expander Grid.Row="2" Grid.ColumnSpan="2" Header="Лидерство в проектах" Margin="5">
+                    <DataGrid x:Name="DataGrid" ItemsSource="{Binding LeaderProjects}" AutoGenerateColumns="False" >
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Заказчки" Binding="{Binding Project.Customer}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Исполнитель" Binding="{Binding Project.Performer}" IsReadOnly="True"/>
+                            <DataGridTemplateColumn Header="Лидер в проектах">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox  IsChecked="{Binding IsLeader, UpdateSourceTrigger=PropertyChanged}">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="Checked">
+                                                    <catel:EventToCommand Command="{Binding ElementName=DataGrid,Path=DataContext.CheckCommand}"
+                                                                      DisableAssociatedObjectOnCannotExecute="False"/>
+                                                </i:EventTrigger>
+                                                <i:EventTrigger EventName="Unchecked">
+                                                    <catel:EventToCommand Command="{Binding ElementName=DataGrid,Path=DataContext.UnCheckCommand}"
+                                                                      DisableAssociatedObjectOnCannotExecute="False"/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                        </CheckBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Expander>
+                <Expander Grid.Row="3" Grid.ColumnSpan="2" Header="Учавствует в проектах" Margin="5">
+                    <DataGrid ItemsSource="{Binding IncludProjects}" AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Заказчик" Binding="{Binding Project.Customer}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Исполнитель" Binding="{Binding Project.Performer}" IsReadOnly="True"/>
+                            <DataGridCheckBoxColumn Header="Включён в проекты" Binding="{Binding InProject}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Expander>
+
+
+            </Grid>
+        </Expander>
+
+    </Grid>
+
+</catel:DataWindow>
