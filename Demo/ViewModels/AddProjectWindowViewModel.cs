@@ -12,26 +12,17 @@ namespace Demo.ViewModels
     using Catel.MVVM;
     using System.Threading.Tasks;
 
-    public class IncludeEmployee
-    {
-        public Employee Employee { get; set; }
-        public bool IsInclude { get; set; }
-
-        public IncludeEmployee(Employee employee, bool b)
-        {
-            Employee = employee;
-            IsInclude = b;
-        }
-    }
-
     public class AddProjectWindowViewModel : ViewModelBase
     {
         private ObservableCollection<Employee> _employees;
+        public override string Title { get { return "Новый проект"; } }
         public AddProjectWindowViewModel(Project project, ObservableCollection<Employee> employees)
         {
             Project = project;
             _employees = employees;
-            DateTimeEnd = DateTime.Now;
+            DateTimeEnd = DateTime.Now.Date;
+            DateTimeStart = DateTime.Now.Date;
+
         }
 
         #region Property
@@ -177,6 +168,25 @@ namespace Demo.ViewModels
 
         #endregion
 
+        #region DateTimeStart property
+
+        /// <summary>
+        /// Gets or sets the DateTimeStart value.
+        /// </summary>
+        [ViewModelToModel("Project")]
+        public DateTime DateTimeStart
+        {
+            get { return GetValue<DateTime>(DateTimeStartProperty); }
+            set { SetValue(DateTimeStartProperty, value); }
+        }
+
+        /// <summary>
+        /// DateTimeStart property data.
+        /// </summary>
+        public static readonly PropertyData DateTimeStartProperty = RegisterProperty("DateTimeStart", typeof(DateTime));
+
+        #endregion
+
         #region DateTimeEnd property
 
         /// <summary>
@@ -235,9 +245,6 @@ namespace Demo.ViewModels
 
         #endregion
 
-        public override string Title { get { return "Новый проект"; } }
-
-
         protected override async Task InitializeAsync()
         {
             await base.InitializeAsync();
@@ -251,7 +258,7 @@ namespace Demo.ViewModels
             }
         }
 
-        protected override async Task CloseAsync()
+        protected override Task<bool> SaveAsync()
         {
             if (Leader != null)
             {
@@ -266,7 +273,8 @@ namespace Demo.ViewModels
                     Project.Employees.Add(employee.Employee);
                 }
             }
-            await base.CloseAsync();
+            return base.SaveAsync();
         }
+     
     }
 }

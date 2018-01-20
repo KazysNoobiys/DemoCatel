@@ -9,14 +9,14 @@ namespace Demo.Models.DAL
 
     public class ProjectDbContext : DbContext
     {
-//        static  ProjectDbContext()
-//        {
-//            Database.SetInitializer(new DropCreateDatabaseAlways<ProjectDbContext>());
-//        }
+        //static ProjectDbContext()
+        //{
+        //    Database.SetInitializer(new DropCreateDatabaseAlways<ProjectDbContext>());
+        //}
         public ProjectDbContext()
             : base("name=ProjectDbContext")
         {
-            this.Configuration.ProxyCreationEnabled = false;
+            //this.Configuration.ProxyCreationEnabled = false;
         }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)

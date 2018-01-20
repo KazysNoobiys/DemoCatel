@@ -5,14 +5,6 @@ namespace Demo.Models.DAL
 {
     public class Employee:ValidatableModelBase
     {
-        //public int Id { get; set; }
-        //public string FirstName { get; set; }
-        //public string LastName { get; set; }
-        //public string Patronymic { get; set; }
-        //public string Email { get; set; }
-        //public virtual ICollection<Project> LeaderToProjects { get; set; }
-        //public virtual ICollection<Project> Projects { get; set; }
-
         #region Id property
 
         /// <summary>

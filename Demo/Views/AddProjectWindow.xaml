@@ -18,7 +18,7 @@
         </Grid.ColumnDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Text="Заказчик" Margin="5"/>
-        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Customer}" MinWidth="100"  Margin="5"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Customer}"  MinWidth="100"  Margin="5"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Исполнитель" Margin="5"/>
         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Performer}" MinWidth="100"  Margin="5"/>
@@ -30,6 +30,7 @@
         <Expander Grid.Row="3" Grid.ColumnSpan="2" Header="Дополнительно" Margin="5">
             <Grid>
                 <Grid.RowDefinitions>
+                    <RowDefinition/>
                     <RowDefinition/>
                     <RowDefinition/>
                     <RowDefinition/>
@@ -56,13 +57,16 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Дата окончания проект" Margin="5"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Дата начала проект" Margin="5"/>
                 <DatePicker Grid.Row="1" Grid.Column="1" Margin="5"
+                            SelectedDate="{Binding DateTimeStart}"  />
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Дата окончания проект" Margin="5"/>
+                <DatePicker Grid.Row="2" Grid.Column="1" Margin="5"
                             SelectedDate="{Binding DateTimeEnd}"  />
-                <Expander Grid.Row="2" Grid.ColumnSpan="2" Header="Описание проекта" Margin="5">
+                <Expander Grid.Row="3" Grid.ColumnSpan="2" Header="Описание проекта" Margin="5">
                     <TextBox Margin="5" Text="{Binding Description}" MinLines="5"/>
                 </Expander>
-                <Expander Grid.Row="3" Grid.ColumnSpan="2" Header="Сотрудники" Margin="5">
+                <Expander Grid.Row="4" Grid.ColumnSpan="2" Header="Сотрудники" Margin="5">
                     <DataGrid ItemsSource="{Binding IncludeEmployees}" AutoGenerateColumns="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Имя" Binding="{Binding Employee.FirstName}" IsReadOnly="True"/>

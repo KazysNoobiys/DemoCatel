@@ -11,33 +11,11 @@ namespace Demo.ViewModels
     using Catel.MVVM;
     using System.Threading.Tasks;
 
-    public class IncludeProject
-    {
-        public Project Project { get; set; }
-        public bool InProject { get; set; }
-
-        public IncludeProject(Project project, bool inProject)
-        {
-            Project = project;
-            InProject = inProject;
-        }
-    }
-
-    public class LeaderProject
-    {
-        public Project Project { get; set; }
-        public bool IsLeader { get; set; }
-
-        public LeaderProject(Project project, bool isLeader)
-        {
-            Project = project;
-            IsLeader = isLeader;
-        }
-    }
     public class AddEmployeeViewModel : ViewModelBase
     {
         private readonly ObservableCollection<Project> _projects;
         private readonly IMessageService _messageService;
+        public override string Title { get { return "Новый сотрудник"; } }
 
         public AddEmployeeViewModel(Employee employee, ObservableCollection<Project> projects, IMessageService messageService)
         {
@@ -99,7 +77,7 @@ namespace Demo.ViewModels
             }
         }
 
-        public override string Title { get { return "Новый сотрудник"; } }
+        
 
         #region IncludProjects property
 
@@ -252,7 +230,7 @@ namespace Demo.ViewModels
             }
         }
 
-        protected override async Task CloseAsync()
+        protected override Task<bool> SaveAsync()
         {
             foreach (var project in LeaderProjects)
             {
@@ -269,7 +247,8 @@ namespace Demo.ViewModels
                 }
             }
 
-            await base.CloseAsync();
+            return base.SaveAsync();
         }
+     
     }
 }

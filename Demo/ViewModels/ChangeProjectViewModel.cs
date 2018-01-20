@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Data.Entity;
 using System.Linq;
+using System.Windows.Data;
 using Catel.Data;
+using Catel.Runtime.Serialization;
 using Demo.Models.DAL;
 using Demo.Models.Repository;
 using Orc.EntityFramework;
@@ -14,13 +18,21 @@ namespace Demo.ViewModels
 
     public class ChangeProjectViewModel : ViewModelBase
     {
+
         private readonly ObservableCollection<Employee> _employees;
-        private List<Employee> _chengedEmpl;
-        public ChangeProjectViewModel(Project project, ObservableCollection<Employee> employees,  List<Employee> chengedEmpl)
+        public override string Title { get { return "Изменение проекта"; } }
+
+        public ChangeProjectViewModel(int projectId)
         {
-            _employees = employees;
-            Project = project;
-            _chengedEmpl = chengedEmpl;
+            using (var uow = new UnitOfWork<ProjectDbContext>())
+            {
+                var employeeRep = uow.GetRepository<IEmployeeRepository>();
+                var projectRep = uow.GetRepository<IProjectRepository>();
+
+                _employees = new ObservableCollection<Employee>(employeeRep.GetAll());
+
+                Project = projectRep.Find(p => p.Id == projectId).First();
+            }
         }
 
         #region OffLeader command
@@ -43,8 +55,6 @@ namespace Demo.ViewModels
             if (EnabledListLeaders)
             {
                 EnabledListLeaders = false;
-                SelectedLeader = null;
-                SelectedIndex = -1;
             }
             else
             {
@@ -54,14 +64,14 @@ namespace Demo.ViewModels
 
         #endregion
 
-        public override string Title { get { return "View model title"; } }
+        #region Property
 
         #region Project property
 
         /// <summary>
         /// Gets or sets the Project value.
         /// </summary>
-        [Model]
+        [Model(SupportIEditableObject = false)]
         public Project Project
         {
             get { return GetValue<Project>(ProjectProperty); }
@@ -132,6 +142,25 @@ namespace Demo.ViewModels
 
         #endregion
 
+        #region DateTimeStart property
+
+        /// <summary>
+        /// Gets or sets the DateTimeStart value.
+        /// </summary>
+        [ViewModelToModel]
+        public DateTime DateTimeStart
+        {
+            get { return GetValue<DateTime>(DateTimeStartProperty); }
+            set { SetValue(DateTimeStartProperty, value); }
+        }
+
+        /// <summary>
+        /// DateTimeStart property data.
+        /// </summary>
+        public static readonly PropertyData DateTimeStartProperty = RegisterProperty("DateTimeStart", typeof(DateTime));
+
+        #endregion
+
         #region DateTimeEnd property
 
         /// <summary>
@@ -175,16 +204,16 @@ namespace Demo.ViewModels
         /// <summary>
         /// Gets or sets the ListLeader value.
         /// </summary>
-        public ObservableCollection<IncludeEmployee> ListLeaders
+        public ICollectionView ListLeaders
         {
-            get { return GetValue<ObservableCollection<IncludeEmployee>>(ListLeadersProperty); }
+            get { return GetValue<ICollectionView>(ListLeadersProperty); }
             set { SetValue(ListLeadersProperty, value); }
         }
 
         /// <summary>
         /// ListLeader property data.
         /// </summary>
-        public static readonly PropertyData ListLeadersProperty = RegisterProperty("ListLeaders", typeof(ObservableCollection<IncludeEmployee>));
+        public static readonly PropertyData ListLeadersProperty = RegisterProperty("ListLeaders", typeof(ICollectionView));
 
         #endregion
 
@@ -202,7 +231,8 @@ namespace Demo.ViewModels
         /// <summary>
         /// SelectedLeader property data.
         /// </summary>
-        public static readonly PropertyData SelectedLeaderProperty = RegisterProperty("SelectedLeader", typeof(IncludeEmployee),null,SelectedLeaderChange);
+        public static readonly PropertyData SelectedLeaderProperty = RegisterProperty("SelectedLeader",
+            typeof(IncludeEmployee), null, SelectedLeaderChange);
 
         private static void SelectedLeaderChange(object sender, AdvancedPropertyChangedEventArgs advancedPropertyChangedEventArgs)
         {
@@ -212,7 +242,7 @@ namespace Demo.ViewModels
             foreach (var employee in vm._employees)
             {
                 bool find = false;
-                foreach (var listEmployee in listEmployees)
+                foreach (IncludeEmployee listEmployee in listEmployees)
                 {
                     if (employee == listEmployee.Employee)
                     {
@@ -221,16 +251,24 @@ namespace Demo.ViewModels
                     }
                 }
                 if (!find)
-                    listEmployees.Add(new IncludeEmployee(employee, true));
+                {
+                    var source = listEmployees.SourceCollection as List<IncludeEmployee>;
+                    source.Add(new IncludeEmployee(employee, false));
+                    listEmployees.Refresh();
+                }
+
             }
             if (vm.SelectedLeader != null)
             {
-                var q = from e in listEmployees
+                var q = from e in listEmployees.SourceCollection as List<IncludeEmployee>
                     where e.Employee == vm.SelectedLeader.Employee
                     select e;
-                listEmployees.Remove(q.First());
+
+                var source = listEmployees.SourceCollection as List<IncludeEmployee>;
+                source.Remove(q.First());
+                listEmployees.Refresh();
             }
-            
+
 
         }
 
@@ -241,34 +279,16 @@ namespace Demo.ViewModels
         /// <summary>
         /// Gets or sets the IncludeEmployees value.
         /// </summary>
-        public ObservableCollection<IncludeEmployee> IncludeEmployees
+        public ICollectionView IncludeEmployees
         {
-            get { return GetValue<ObservableCollection<IncludeEmployee>>(IncludeEmployeesProperty); }
+            get { return GetValue<ICollectionView>(IncludeEmployeesProperty); }
             set { SetValue(IncludeEmployeesProperty, value); }
         }
 
         /// <summary>
         /// IncludeEmployees property data.
         /// </summary>
-        public static readonly PropertyData IncludeEmployeesProperty = RegisterProperty("IncludeEmployees", typeof(ObservableCollection<IncludeEmployee>));
-
-        #endregion
-
-        #region SelectedIndex property
-
-        /// <summary>
-        /// Gets or sets the SelectedIndex value.
-        /// </summary>
-        public int SelectedIndex
-        {
-            get { return GetValue<int>(SelectedIndexProperty); }
-            set { SetValue(SelectedIndexProperty, value); }
-        }
-
-        /// <summary>
-        /// SelectedIndex property data.
-        /// </summary>
-        public static readonly PropertyData SelectedIndexProperty = RegisterProperty("SelectedIndex", typeof(int));
+        public static readonly PropertyData IncludeEmployeesProperty = RegisterProperty("IncludeEmployees", typeof(ICollectionView));
 
         #endregion
 
@@ -286,90 +306,124 @@ namespace Demo.ViewModels
         /// <summary>
         /// EnabledListLeaders property data.
         /// </summary>
-        public static readonly PropertyData EnabledListLeadersProperty = RegisterProperty("EnabledListLeaders", typeof(bool),true);
+        public static readonly PropertyData EnabledListLeadersProperty = RegisterProperty("EnabledListLeaders", typeof(bool), true);
+
+#endregion
 
         #endregion
         protected override async Task InitializeAsync()
         {
             await base.InitializeAsync();
 
-            ListLeaders = new ObservableCollection<IncludeEmployee>();
-            IncludeEmployees = new ObservableCollection<IncludeEmployee>();
+            var listLeade = new List<IncludeEmployee>();
+            var listEmp = new List<IncludeEmployee>();
+
+            ListLeaders = new ListCollectionView(listLeade);
+            IncludeEmployees = new ListCollectionView(listEmp);
             foreach (var employee in _employees)
             {
-                ListLeaders.Add(new IncludeEmployee(employee, false));
-
-                if (Project.Employees != null)
+                listLeade.Add(new IncludeEmployee(employee, false));
+                listEmp.Add(new IncludeEmployee(employee, false));
+            }
+            foreach (var projectEmployee in Project.Employees)
+            {
+                foreach (var includeEmployee in listEmp)
                 {
-                    foreach (var projectEmployee in Project.Employees)
-                    {
-                        if (employee.Equals(projectEmployee))
-                        {
-                            IncludeEmployees.Add(new IncludeEmployee(employee, true));
-                        }
-                    }
+                    if (projectEmployee == includeEmployee.Employee)
+                        includeEmployee.IsInclude = true;
                 }
-                
-                IncludeEmployees.Add(new IncludeEmployee(employee, false));
             }
 
             if (Project.Leader != null)
             {
-                int i = 0;
-                foreach (var leader in ListLeaders)
+                foreach (var leader in listLeade)
                 {
+                    ListLeaders.MoveCurrentToNext();
                     if (leader.Employee == Project.Leader)
                     {
                         SelectedLeader = leader;
-                        SelectedIndex = i;
-                        IncludeEmployees.Remove(SelectedLeader);
+                        break;
                     }
-                    i++;
                 }
             }
-           
-                
+
+
         }
 
-        protected override async Task CloseAsync()
+        protected override Task<bool> SaveAsync()
         {
-            foreach (var includeEmployee in IncludeEmployees)
+            using (var uow = new UnitOfWork<ProjectDbContext>())
             {
-                if (includeEmployee.IsInclude)
+                var employeeRep = uow.GetRepository<IEmployeeRepository>();
+                var projectRep = uow.GetRepository<IProjectRepository>();
+
+                if (EnabledListLeaders)
                 {
-                    if (!Project.Employees.Contains(includeEmployee.Employee))
+                    if (Project.Leader != null)
                     {
-                        Project.Employees.Add(includeEmployee.Employee);
-                        includeEmployee.Employee.Projects.Add(Project);
+                        Project.Leader.LeaderToProjects.Remove(Project);
+                        Project.Leader.Projects.Remove(Project);
+                        employeeRep.Update(Project.Leader);
+
+                        Project.Leader = SelectedLeader.Employee;
+                        SelectedLeader.Employee.LeaderToProjects.Add(Project);
+                        SelectedLeader.Employee.Projects.Add(Project);
+                        employeeRep.Update(Project.Leader);
+                        projectRep.Update(Project);
+                    }
+                    else
+                    {
+                        if (SelectedLeader != null)
+                        {
+                            Project.Leader = SelectedLeader.Employee;
+                            SelectedLeader.Employee.LeaderToProjects.Add(Project);
+                            SelectedLeader.Employee.Projects.Add(Project);
+                            employeeRep.Update(Project.Leader);
+                            projectRep.Update(Project);
+                        }
                     }
                 }
                 else
                 {
-                    if (Project.Employees.Contains(includeEmployee.Employee))
+                    if (Project.Leader != null)
                     {
-                        Project.Employees.Remove(includeEmployee.Employee);
-                        includeEmployee.Employee.Projects.Remove(Project);
-                        _chengedEmpl.Add(includeEmployee.Employee);
+                        Project.Leader.LeaderToProjects.Remove(Project);
+                        Project.Leader.Projects.Remove(Project);
+                        employeeRep.Update(Project.Leader);
+
+                        Project.Leader = null;
+                        projectRep.Update(Project);
                     }
                 }
-            }
 
-            if (SelectedLeader == null)
-            {
-                if (Project.Leader != null)
+                foreach (IncludeEmployee includeEmployee in IncludeEmployees)
                 {
-                    Project.Leader.LeaderToProjects.Remove(Project);
-                    Project.Leader.Projects.Remove(Project);
-                    Project.Leader = null;
+                    if (includeEmployee.IsInclude)
+                    {
+                        if (!Project.Employees.Contains(includeEmployee.Employee))
+                        {
+                            includeEmployee.Employee.Projects.Add(Project);
+                            Project.Employees.Add(includeEmployee.Employee);
+                            employeeRep.Update(includeEmployee.Employee);
+                            projectRep.Update(Project);
+                        }
+                    }
+                    if (!includeEmployee.IsInclude)
+                    {
+                        if (Project.Employees.Contains(includeEmployee.Employee))
+                        {
+                            includeEmployee.Employee.Projects.Remove(Project);
+                            Project.Employees.Remove(includeEmployee.Employee);
+                            employeeRep.Update(includeEmployee.Employee);
+                            projectRep.Update(Project);
+                        }
+                    }
                 }
+                projectRep.Update(Project);
+                uow.SaveChanges();
             }
-            else
-            {
-                Project.Leader = SelectedLeader.Employee;
-                Project.Leader.LeaderToProjects.Add(Project);
-                Project.Leader.Projects.Add(Project);
-            }
-            await base.CloseAsync();
+            return base.SaveAsync();
         }
+
     }
 }

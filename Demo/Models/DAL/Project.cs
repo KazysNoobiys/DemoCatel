@@ -8,15 +8,6 @@ namespace Demo.Models.DAL
     public class Project : ValidatableModelBase
     {
 
-        //public int Id { get; set; }
-        //public string Customer { get; set; }
-        //public string Performer { get; set; }
-        //public virtual Employee Leader { get; set; }
-        //public int Priority { get; set; }
-        //public DateTime DateTimeEnd { get; set; }
-        //public string Description { get; set; }
-        //public virtual ICollection<Employee> Employees { get; set; }
-
         #region Id property
 
         /// <summary>
@@ -104,6 +95,24 @@ namespace Demo.Models.DAL
         /// Priority property data.
         /// </summary>
         public static readonly PropertyData PriorityProperty = RegisterProperty("Priority", typeof(int),1);
+
+        #endregion
+
+        #region DateTimeStart property
+
+        /// <summary>
+        /// Gets or sets the DateTimeStart value.
+        /// </summary>
+        public DateTime DateTimeStart
+        {
+            get { return GetValue<DateTime>(DateTimeStartProperty); }
+            set { SetValue(DateTimeStartProperty, value); }
+        }
+
+        /// <summary>
+        /// DateTimeStart property data.
+        /// </summary>
+        public static readonly PropertyData DateTimeStartProperty = RegisterProperty("DateTimeStart", typeof(DateTime));
 
         #endregion
 

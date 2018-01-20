@@ -34,6 +34,7 @@
                     <RowDefinition/>
                     <RowDefinition/>
                     <RowDefinition/>
+                    <RowDefinition/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -42,7 +43,7 @@
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Лидер проекта" Margin="5"/>
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="5">
                     <ComboBox  ItemsSource="{Binding ListLeaders}" IsEnabled="{Binding EnabledListLeaders}"
-                          SelectedItem="{Binding SelectedLeader}" SelectedIndex="{Binding SelectedIndex}" >
+                               SelectedItem="{Binding SelectedLeader}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate >
                                 <TextBlock>
@@ -59,18 +60,21 @@
                     <CheckBox x:Name="CheckBox" Content="Без лидера" IsChecked="False" 
                               Margin="5,0,0,0" Command="{Binding OffLeaderCommand}"/>
                 </StackPanel>
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Дата окончания проект" Margin="5"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Дата начала проект" Margin="5"/>
                 <DatePicker Grid.Row="1" Grid.Column="1" Margin="5"
+                            SelectedDate="{Binding DateTimeStart}"  />
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Дата окончания проект" Margin="5"/>
+                <DatePicker Grid.Row="2" Grid.Column="1" Margin="5"
                             SelectedDate="{Binding DateTimeEnd}"  />
-                <Expander Grid.Row="2" Grid.ColumnSpan="2" Header="Описание проекта" Margin="5">
+                <Expander Grid.Row="3" Grid.ColumnSpan="2" Header="Описание проекта" Margin="5">
                     <TextBox Margin="5" Text="{Binding Description}" MinLines="5"/>
                 </Expander>
-                <Expander Grid.Row="3" Grid.ColumnSpan="2" Header="Сотрудники" Margin="5">
+                <Expander Grid.Row="4" Grid.ColumnSpan="2" Header="Сотрудники" Margin="5">
                     <DataGrid ItemsSource="{Binding IncludeEmployees}" AutoGenerateColumns="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Имя" Binding="{Binding Employee.FirstName}" IsReadOnly="True"/>
                             <DataGridTextColumn Header="Фамилия" Binding="{Binding Employee.LastName}" IsReadOnly="True" />
-                            <DataGridCheckBoxColumn Header="Включён в проект" Binding="{Binding IsInclude, UpdateSourceTrigger=PropertyChanged}"/>
+                            <DataGridCheckBoxColumn Header="Включён в проект" Binding="{Binding Path=IsInclude}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Expander>
